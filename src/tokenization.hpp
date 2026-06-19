@@ -1,7 +1,8 @@
 #pragma once
+
 #include <string>
 #include <vector>
-
+#include <optional>
 
 enum class TokenType {
     exit,
@@ -11,33 +12,25 @@ enum class TokenType {
 
 struct Token {
     TokenType type;
-    std::optional<std::string> value;
+    std::optional<std::string> value {};
 };
 
-
-//reading more than one semi -> fix
-//no semi -> fix
-//consume whitespace -> fix
-//1 byte consumer -> fix
 class Tokenizer {
 public:
-    inline explicit  Tokenizer(std::string src)
-        : m_src(std::move(src)){
-
-    }
-
-    std::vector<Token>tokenize() {
+    inline explicit Tokenizer(std::string src)
+        : m_src(std::move(src)){}
+    inline std::vector<Token> tokenize()
+    {
         std::vector<Token> tokens;
         std::string buf;
-
         while (peak().has_value()) {
-            if (std::isalpha(peak().value())){
+            if (std::isalpha(peak().value())) {
                 buf.push_back(consume());
                 while (peak().has_value() && std::isalnum(peak().value())) {
                     buf.push_back(consume());
                 }
-                if (buf == "exit"){
-                    tokens.push_back({.type = TokenType::exit});
+                if (buf == "exit") {
+                    tokens.push_back({ .type = TokenType::exit });
                     buf.clear();
                     continue;
                 }
@@ -51,13 +44,13 @@ public:
                 while (peak().has_value() && std::isdigit(peak().value())) {
                     buf.push_back(consume());
                 }
-                tokens.push_back({.type = TokenType::int_lit, .value = buf});
+                tokens.push_back({ .type = TokenType::int_lit, .value = buf });
                 buf.clear();
                 continue;
             }
             else if (peak().value() == ';') {
                 consume();
-                tokens.push_back({.type = TokenType::semi});
+                tokens.push_back({ .type = TokenType::semi });
                 continue;
             }
             else if (std::isspace(peak().value())) {
@@ -69,25 +62,25 @@ public:
                 exit(EXIT_FAILURE);
             }
         }
+        m_index = 0;
         return tokens;
     }
+
 private:
-    //peaking and consuming here
-    [[nodiscard]] std::optional<char> peak(int ahead = 1)const {
+    [[nodiscard]] inline std::optional<char> peak(int ahead = 1) const{
         if (m_index + ahead > m_src.length()) {
             return {};
         }
         else {
-            return m_src.at(m_index);
+            return m_src.at(m_index); //possibilities of error here -> try m_index + ahead
         }
     }
 
-    char consume() {
-        //need to change the increment stuff
-        return m_src.at(m_index++);
+    inline char consume(){
+        return m_src.at(m_index++); //no increments please
     }
 
-    const std::string m_src;
-    int m_index = 0;
 
+    const std::string m_src;
+    size_t m_index = 0;
 };

@@ -51,7 +51,9 @@ int main(int argc, char* argv[]) {
         std::fstream file("out.asm", std::ios::out);
         file << tokens_to_asm(tokens);
     }
-    system("nasm -felf64 out.asm");
-    system("ld -o out out.o");
+
+    //error in executable here -> fix
+    system("nasm -f elf64 out.asm -o out.o");
+    system("ld out.o -o out");
     return EXIT_SUCCESS;
 }
